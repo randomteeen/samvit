@@ -151,6 +151,7 @@ def run(state: DesignState) -> StageResult:
 
     budget_usd: Optional[float] = getattr(state.requirements, "budget_usd", None) if state.requirements else None
     selected: Dict[str, str] = {}
+    quantities: Dict[str, int] = {}   # subsystem_name → unit count
 
     for sub in state.architecture.subsystems:
         # 1. Try PartSelectionEngine (offline DB scoring)
@@ -177,17 +178,31 @@ def run(state: DesignState) -> StageResult:
             ))
         else:
             selected[sub.name] = pn
+            quantities[sub.name] = max(1, int(getattr(sub, "quantity", 1) or 1))
+
+    # Extended BOM cost = sum(unit_cost * quantity) over selected parts.
+    bom_cost_usd = 0.0
+    for sub_name, pn in selected.items():
+        comp = state.components.get(pn)
+        if comp is not None:
+            bom_cost_usd += comp.cost_usd * quantities.get(sub_name, 1)
 
     # Persist selection into state for downstream stages
     if not hasattr(state, "stage_data") or state.stage_data is None:
         state.stage_data = {}
-    state.stage_data.setdefault("p08_part_selection", {})["selected"] = selected
+    _sd = state.stage_data.setdefault("p08_part_selection", {})
+    _sd["selected"] = selected
+    _sd["quantities"] = quantities
 
     has_errors = any(i.is_error() for i in issues)
     return StageResult(
         stage="p08_part_selection",
         status=StageStatus.FAILED if has_errors else StageStatus.PASSED,
-        data={"selected": selected},
+        data={
+            "selected": selected,
+            "quantities": quantities,
+            "bom_cost_usd": round(bom_cost_usd, 2),
+        },
         issues=issues,
         duration=time.monotonic() - t0,
     )

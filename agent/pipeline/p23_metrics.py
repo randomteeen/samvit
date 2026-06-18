@@ -60,7 +60,16 @@ def run(state: DesignState) -> StageResult:
     max_temp      = _get("p19_thermal", "max_temp_c")
     sim_pass_rate = _get("p21_simulation", "pass_rate")
 
-    comp_count = len(state.components)
+    # Real placed-part count = sum of selected-subsystem quantities (e.g. 144
+    # motors + 9 drivers + …), NOT len(state.components) which counts the whole
+    # candidate catalogue and wildly overstates the board.
+    if sel_result and sel_result.data.get("selected"):
+        selected_map = sel_result.data.get("selected", {})
+        quantities_map = sel_result.data.get("quantities", {})
+        comp_count = sum(max(1, int(quantities_map.get(name, 1)))
+                         for name in selected_map)
+    else:
+        comp_count = len(state.components)
     net_count  = len(state.schematic.nets) if state.schematic else 0
     board_area = (state.layout.board_width * state.layout.board_height
                   if state.layout else 0.0)

@@ -136,10 +136,11 @@ class Subsystem:
     category:    str
     voltage_min: float = 0.0
     voltage_max: float = 5.0
-    current_ma:  float = 100.0
+    current_ma:  float = 100.0    # peak current draw of ONE unit
     interface:   str   = "GPIO"
     priority:    int   = 1        # 1 = must-have, 2 = nice-to-have
     notes:       str   = ""
+    quantity:    int   = 1        # number of identical instances (e.g. 144 motors)
 
 
 @dataclass

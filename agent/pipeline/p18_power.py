@@ -84,15 +84,27 @@ def run(state: DesignState) -> StageResult:
     issues: List[Issue] = []
 
     sel_result = state.stage_results.get("p08_part_selection")
+    selected_map: Dict[str, str] = (
+        sel_result.data.get("selected", {}) if sel_result else {}
+    )
+    quantities_map: Dict[str, int] = (
+        sel_result.data.get("quantities", {}) if sel_result else {}
+    )
     selected_pns: List[str] = list(
-        sel_result.data.get("selected", {}).values()
+        selected_map.values()
     ) if sel_result else list(state.components.keys())
+
+    # part_number → number of identical units (e.g. 144 motors all share one pn).
+    pn_qty: Dict[str, int] = {}
+    for sub_name, pn in selected_map.items():
+        pn_qty[pn] = pn_qty.get(pn, 0) + max(1, int(quantities_map.get(sub_name, 1)))
 
     selected_comps = {pn: state.components[pn] for pn in selected_pns if pn in state.components}
 
     # Group by voltage rail
     rails: Dict[float, RailAnalysis] = {}
     for pn, comp in selected_comps.items():
+        qty = max(1, pn_qty.get(pn, 1))
         v = round(comp.voltage_max, 1)
         if v not in rails:
             rails[v] = RailAnalysis(
@@ -107,7 +119,7 @@ def run(state: DesignState) -> StageResult:
         if comp.category in ("POWER", "Charger IC", "Buck-Boost", "LDO", "Boost Converter"):
             rail.sources.append(pn)
         else:
-            rail.total_draw_ma += comp.current_ma
+            rail.total_draw_ma += comp.current_ma * qty
             rail.consumers.append(pn)
 
     for rail in rails.values():
@@ -122,7 +134,7 @@ def run(state: DesignState) -> StageResult:
     if total_draw_ma <= 0 and state.architecture:
         for _sub in state.architecture.subsystems:
             if _sub.category not in ("POWER",) and _sub.current_ma > 0:
-                total_draw_ma += _sub.current_ma
+                total_draw_ma += _sub.current_ma * max(1, int(getattr(_sub, "quantity", 1) or 1))
         total_power_mw = total_draw_ma * 3.3  # 3.3 V rail average
 
     # Battery life estimate

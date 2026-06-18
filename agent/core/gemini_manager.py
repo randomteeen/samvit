@@ -5,13 +5,14 @@ Multi-key, multi-model Gemini router with real-time quota awareness,
 automatic key rotation on 429s, and an async call interface designed
 to minimise total API round-trips through batched, context-rich prompts.
 
-Model tiers
+Model tiers (see HEAVY_MODELS / MEDIUM_MODELS / LIGHT_MODELS for the
+authoritative, verified-against-the-API rosters)
 -----------
-  HEAVY   → gemini-2.5-pro-preview-06-05 (rank 1)
+  HEAVY   → gemini-3-flash-preview        (rank 1)
              gemini-2.5-flash             (rank 2)
-  MEDIUM  → gemini-2.5-flash-lite        (rank 1)
-             gemini-2.0-flash-lite        (rank 2)
-  LIGHT   → gemma-3-27b-it  | gemma-3-12b-it | gemma-3-4b-it
+  MEDIUM  → gemini-3.1-flash-lite-preview (rank 1)
+             gemini-2.5-flash-lite        (rank 2)
+  LIGHT   → gemma-4-31b-it | gemma-4-26b-a4b-it | gemini-2.0-flash-lite | gemini-2.0-flash
 
 Key rotation rules
 ------------------
@@ -38,6 +39,51 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
+
+
+def _extract_text(response: Any, model: str) -> str:
+    """Pull text out of a generate_content response WITHOUT crashing.
+
+    The `response.text` quick accessor raises ("requires a valid Part")
+    whenever the candidate has no plain-text part — which happens for
+    "thinking" models when the output budget is consumed by reasoning
+    (finish_reason=MAX_TOKENS), on a safety stop, or on a recitation block.
+    A bare `return response.text` therefore turns a recoverable empty
+    response into an exception that callers (p03 architecture, p24 reviewer)
+    catch and silently downgrade to a hardcoded heuristic stub.
+
+    Here we (1) try the quick accessor, (2) fall back to manually joining any
+    text parts, and (3) raise a *clear, descriptive* error (so the retry /
+    key-and-model rotation chain can try another model) only when there is
+    genuinely no usable text.
+    """
+    try:
+        text = response.text
+        if text:
+            return text
+    except Exception:
+        pass
+
+    candidates = getattr(response, "candidates", None) or []
+    if candidates:
+        cand = candidates[0]
+        content = getattr(cand, "content", None)
+        parts = getattr(content, "parts", None) or []
+        joined = "".join(getattr(p, "text", "") or "" for p in parts)
+        if joined.strip():
+            return joined
+        finish = getattr(cand, "finish_reason", None)
+        raise RuntimeError(
+            f"{model} returned no text part (finish_reason={finish}). "
+            "Likely the output token budget was exhausted by reasoning "
+            "(MAX_TOKENS) or the response was blocked."
+        )
+
+    feedback = getattr(response, "prompt_feedback", None)
+    raise RuntimeError(
+        f"{model} returned no candidates"
+        + (f" (prompt_feedback={feedback})" if feedback else "")
+    )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -94,15 +140,14 @@ class GeminiModelManager:
         "gemini-2.5-flash-lite",         # medium rank 2 — Gemini 2.5 Flash Lite (10 RPM / 250K TPM)
     ]
     LIGHT_MODELS: List[str] = [
-        # Gemma 4 (via Gemini API)
-        "gemma-4-31b-it",              # light rank 1 — Gemma 4 31B Dense (15 RPM / 1.5K RPD)
-        "gemma-4-27b-it",              # light rank 2 — Gemma 4 26B MoE A4B (15 RPM / 1.5K RPD)
-        # Gemma 3 (via Gemini API)
-        "gemma-3-27b-it",              # light rank 3 — Gemma 3 27B (30 RPM / 14.4K RPD)
-        "gemma-3-12b-it",              # light rank 4 — Gemma 3 12B (30 RPM / 14.4K RPD)
-        "gemma-3-4b-it",               # light rank 5 — Gemma 3 4B (30 RPM / 14.4K RPD)
-        "gemma-3-2b-it",               # light rank 6 — Gemma 3 2B (30 RPM / 14.4K RPD)
-        "gemma-3-1b-it",               # light rank 7 — Gemma 3 1B (30 RPM / 14.4K RPD)
+        # Verified against the Gemini API model list. The previous roster listed
+        # gemma-3-* ids and "gemma-4-27b-it", none of which resolve (404
+        # NOT_FOUND) — that made the entire light tier unusable. These are the
+        # cheap models the API actually exposes for generateContent.
+        "gemma-4-31b-it",              # light rank 1 — Gemma 4 31B Dense
+        "gemma-4-26b-a4b-it",          # light rank 2 — Gemma 4 26B MoE A4B
+        "gemini-2.0-flash-lite",       # light rank 3 — reliable cheap fallback
+        "gemini-2.0-flash",            # light rank 4 — reliable cheap fallback
     ]
 
     TIER_MAP: Dict[str, List[str]] = {
@@ -393,7 +438,7 @@ class GeminiModelManager:
                 )
 
             response = gen_model.generate_content(prompt)
-            return response.text
+            return _extract_text(response, model)
 
         return await asyncio.to_thread(_sync_call)
 
