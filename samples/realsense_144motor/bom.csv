@@ -1,0 +1,17 @@
+#,Subsystem,Part Number,Manufacturer,Category,Package,Footprint,Qty,Unit Cost USD,Total Cost USD,Notes
+1,central_processing_unit,Raspberry Pi 4B,Various,SBC,Board,Module:RPi4B,1,45.00,45.00,Runs Jarvis engine [heatsink]
+2,depth_sensor_array,Intel RealSense D435,Various,Depth Sensor,Module,Connector:Conn_01x04_Female,2,179.00,358.00,Primary heatmap input [heatsink]
+3,pwm_driver_array,TXS0108E,Various,Level Shifter,TSSOP-20,Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm,9,1.50,13.50,3.3V↔5V signal bridging
+4,haptic_actuators,ERM Vibration Motor 10mm,Various,Actuator,Through-hole,Connector:Conn_01x02,144,1.20,172.80,Primary haptic output
+5,audio_amplifier,PAM8403,Various,Audio Amp,SOP-16,Package_SO:SOP-16_3.9x9.9mm_P1.27mm,1,0.80,0.80,Audio feedback output [heatsink]
+6,audio_transducer,PAM8403,Various,Audio Amp,SOP-16,Package_SO:SOP-16_3.9x9.9mm_P1.27mm,1,0.80,0.80,Audio feedback output [heatsink]
+7,power_distribution_network,AMS1117-3.3,Various,LDO,SOT-223,Package_TO_SOT_SMD:SOT-223-3_TabPin2,1,0.30,0.30,3.3V rail from 5V [heatsink]
+8,Motor Power Rail,LP5907-3.0,Generic,PASSIVE,0402,Resistor_SMD:R_0402_1005Metric,1,0.10,0.10,Add a dedicated 3.0V LDO to safely power the vibration motors from the 5V rail. [repair-ghost]
+9,Logic Level Shifter,TXB0108PWR,Generic,PASSIVE,0402,Resistor_SMD:R_0402_1005Metric,1,0.10,0.10,Add 8-channel bidirectional level shifters between the Raspberry Pi 5V GPIO and the 3.3V sensor/motor control logic. [repair-ghost]
+10,Logic_Level_Shifter,TXB0104,Generic,PASSIVE,0402,Resistor_SMD:R_0402_1005Metric,1,0.10,0.10,Add bidirectional level shifters between the Raspberry Pi 5V GPIO and the 3.3V/3.0V sensor/motor control lines. [repair-ghost]
+11,Logic_Interface,SN74AVC4T245,Generic,PASSIVE,0402,Resistor_SMD:R_0402_1005Metric,1,0.10,0.10,Insert bidirectional voltage-level translators between the 5V Raspberry Pi / Sensor domains and the 3.0V/3.3V logic domains to prevent overvoltage damage. [repair-ghost]
+12,Power Stage,100uF X5R Ceramic Capacitors,Generic,PASSIVE,0402,Resistor_SMD:R_0402_1005Metric,1,0.10,0.10,Add bulk decoupling to the 3.3V and 5V rails to improve voltage stability during peak load transients. [repair-ghost]
+13,Logic Interface,TXB0108PWR,Generic,PASSIVE,0402,Resistor_SMD:R_0402_1005Metric,1,0.10,0.10,Add 8-channel bidirectional level shifters between the Raspberry Pi 5V GPIO and the 3.3V sensor/motor control logic. [repair-ghost]
+14,Logic Level Shifters,LSF0108,Generic,PASSIVE,0402,Resistor_SMD:R_0402_1005Metric,1,0.10,0.10,Insert multi-channel bidirectional level translators between the Raspberry Pi 4B (5V) and the 3.3V sensor/logic domains. [repair-ghost]
+15,Logic_Level_Shifters,LSF0108,Generic,PASSIVE,0402,Resistor_SMD:R_0402_1005Metric,1,0.10,0.10,Insert multi-channel bidirectional level translators between the Raspberry Pi 4B (5V) and the 3.3V sensor/logic domains. [repair-ghost]
+,,,,,,TOTAL,,,592.00,

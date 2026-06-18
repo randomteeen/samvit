@@ -1,0 +1,16 @@
+Designator,Footprint,X_mm,Y_mm,Rotation,Layer,Side
+U1,Module:RPi4B,35.560,35.560,0.0,F.Cu,Top
+S2,Connector:Conn_01x04_Female,5.080,5.080,0.0,F.Cu,Top
+U3,Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm,35.560,55.880,0.0,F.Cu,Top
+M4,Connector:Conn_01x02,71.120,35.560,0.0,F.Cu,Top
+AMP5,Package_SO:SOP-16_3.9x9.9mm_P1.27mm,71.120,55.880,0.0,F.Cu,Top
+AMP6,Package_SO:SOP-16_3.9x9.9mm_P1.27mm,78.740,55.880,0.0,F.Cu,Top
+U7,Package_TO_SOT_SMD:SOT-223-3_TabPin2,5.080,55.880,0.0,F.Cu,Top
+U8,Resistor_SMD:R_0402_1005Metric,50.800,71.120,0.0,F.Cu,Top
+U9,Resistor_SMD:R_0402_1005Metric,58.420,71.120,0.0,F.Cu,Top
+U10,Resistor_SMD:R_0402_1005Metric,66.040,71.120,0.0,F.Cu,Top
+U11,Resistor_SMD:R_0402_1005Metric,50.800,78.740,0.0,F.Cu,Top
+U12,Resistor_SMD:R_0402_1005Metric,58.420,78.740,0.0,F.Cu,Top
+U13,Resistor_SMD:R_0402_1005Metric,66.040,78.740,0.0,F.Cu,Top
+U14,Resistor_SMD:R_0402_1005Metric,50.800,86.360,0.0,F.Cu,Top
+U15,Resistor_SMD:R_0402_1005Metric,58.420,86.360,0.0,F.Cu,Top

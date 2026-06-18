@@ -1,0 +1,52 @@
+{
+  "checkpoint": 19,
+  "label": "final",
+  "timestamp": "2026-06-18T11:32:30Z",
+  "iteration": 7,
+  "stages_completed": [
+    "p01_requirements",
+    "p03_architecture",
+    "p06_component_db",
+    "p05_datasheet",
+    "p07_component_search",
+    "p08_part_selection",
+    "p15_rules",
+    "p30_human_override",
+    "p22_test_gen",
+    "p24_reviewer",
+    "p25_repair",
+    "p20_short_circuit",
+    "p09_compatibility",
+    "p10_schematic_graph",
+    "p11_schematic_gen",
+    "p12_footprint",
+    "p13_placement",
+    "p14_routing",
+    "p17_drc",
+    "p18_power",
+    "p16_erc",
+    "p19_thermal",
+    "p21_simulation",
+    "p23_metrics",
+    "p26_kicad",
+    "p27_exporter",
+    "p28_logging",
+    "p29_visualizer"
+  ],
+  "files": [
+    "drill.drl",
+    "that_takes_in_live_depth_data_from_two_sensors,_builds_a_spa.kicad_pro",
+    "state.json",
+    "gerbers",
+    "that_takes_in_live_depth_data_from_two_sensors,_builds_a_spa.kicad_pcb",
+    "pick_place.csv",
+    "that_takes_in_live_depth_data_from_two_sensors,_builds_a_spa.kicad_sch",
+    "bom.csv"
+  ],
+  "metrics_snapshot": {
+    "erc_errors": 0,
+    "drc_errors": 0,
+    "pass_rate": 0.167,
+    "cost_usd": 598.1
+  }
+}

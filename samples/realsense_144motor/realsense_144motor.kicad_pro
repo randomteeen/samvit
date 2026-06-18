@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "filename": "that_takes_in_live_depth_data_from_two_sensors,_builds_a_spa.kicad_pro",
+    "version": 1
+  },
+  "schematic": {
+    "legacy_lib_dir": "",
+    "legacy_lib_list": []
+  },
+  "pcbnew": {
+    "last_paths": {},
+    "page_layout_descr_file": "",
+    "plot_directory": "./gerbers/",
+    "spice_adjust_passive_values": false
+  },
+  "text_variables": {
+    "REVISION": "v8.0",
+    "PROJECT": "that_takes_in_live_depth_data_from_two_sensors,_builds_a_spa"
+  }
+}
