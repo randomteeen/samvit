@@ -32,7 +32,9 @@ from agent.core.models import (
 def _generate_bom(
     selected_map: Dict[str, str],
     components: Dict[str, Component],
+    quantities: Optional[Dict[str, int]] = None,
 ) -> str:
+    quantities = quantities or {}
     buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow(["#", "Subsystem", "Part Number", "Manufacturer", "Category",
@@ -42,11 +44,13 @@ def _generate_bom(
         comp = components.get(pn)
         if comp is None:
             continue
-        cost = comp.cost_usd
-        total += cost
+        qty = max(1, int(quantities.get(sub, 1)))
+        line_cost = comp.cost_usd * qty
+        total += line_cost
         writer.writerow([
             i, sub, comp.part_number, comp.manufacturer, comp.category,
-            comp.package, comp.footprint, 1, f"{cost:.2f}", f"{cost:.2f}", comp.notes,
+            comp.package, comp.footprint, qty,
+            f"{comp.cost_usd:.2f}", f"{line_cost:.2f}", comp.notes,
         ])
     writer.writerow(["", "", "", "", "", "", "TOTAL", "", "", f"{total:.2f}", ""])
     return buf.getvalue()
@@ -151,11 +155,12 @@ def run(state: DesignState) -> StageResult:
 
     sel_result = state.stage_results.get("p08_part_selection")
     selected   = sel_result.data.get("selected", {}) if sel_result else {}
+    quantities = sel_result.data.get("quantities", {}) if sel_result else {}
 
     artefacts: Dict[str, str] = {}
 
     # BOM
-    artefacts["bom.csv"] = _generate_bom(selected, state.components)
+    artefacts["bom.csv"] = _generate_bom(selected, state.components, quantities)
 
     # Pick-and-place
     if state.layout:

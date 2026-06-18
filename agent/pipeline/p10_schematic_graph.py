@@ -114,9 +114,12 @@ def build_graph(
         des = _designator(sub.name, i)
         des_map[sub.name] = des
         comp = components.get(pn)
+        qty = max(1, int(getattr(sub, "quantity", 1) or 1))
         value = pn
         if comp:
             value = f"{comp.part_number} ({comp.voltage_max}V)"
+        if qty > 1:
+            value = f"{value} x{qty}"
         sch_comps.append(SchematicComponent(
             designator=des,
             part_number=pn,
